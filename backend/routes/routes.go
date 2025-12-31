@@ -23,6 +23,7 @@ func SetupRoutes(app *fiber.App) {
 	protected.Get("/profile", controllers.GetProfile)
 	protected.Put("/profile/password", controllers.ChangePassword)
 	protected.Delete("/profile/account", controllers.DeleteAccount)
+	protected.Post("/ai/insight", controllers.GetFinancialInsight)
 
 	// Categories
 	categories := protected.Group("/categories")

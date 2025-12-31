@@ -9,6 +9,7 @@ import { transactionService } from '../api/transactionService';
 import { categoryService } from '../api/categoryService';
 import { FiPlus, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import AiInsightCard from '../components/AiInsightCard';
 import * as XLSX from 'xlsx';
 
 const Dashboard = () => {
@@ -159,7 +160,14 @@ const Dashboard = () => {
           </div>
         </header>
 
+
+
         <main className="flex-1 p-6 space-y-6">
+          {/* AI Insight Section */}
+          <div className="w-full">
+            <AiInsightCard transactions={transactions} />
+          </div>
+
           {/* Top Row: Balance & Charts */}
           {/* Top Row: Balance & Charts */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
