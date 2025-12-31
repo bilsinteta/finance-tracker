@@ -128,3 +128,63 @@ func GetProfile(c *fiber.Ctx) error {
 		},
 	})
 }
+
+// Structs for input
+type ChangePasswordRequest struct {
+	OldPassword string `json:"old_password"`
+	NewPassword string `json:"new_password"`
+}
+
+// Change Password
+func ChangePassword(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+	req := new(ChangePasswordRequest)
+
+	if err := c.BodyParser(req); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "Invalid request"})
+	}
+
+	if req.OldPassword == "" || req.NewPassword == "" {
+		return c.Status(400).JSON(fiber.Map{"error": "Old and new passwords are required"})
+	}
+
+	var user models.User
+	if err := config.DB.First(&user, userID).Error; err != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "User not found"})
+	}
+
+	// Verify old password
+	if !utils.CheckPassword(user.Password, req.OldPassword) {
+		return c.Status(401).JSON(fiber.Map{"error": "Incorrect old password"})
+	}
+
+	// Hash new password
+	hashedPassword, err := utils.HashPassword(req.NewPassword)
+	if err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to hash password"})
+	}
+
+	// Update password
+	user.Password = hashedPassword
+	if err := config.DB.Save(&user).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to update password"})
+	}
+
+	return c.JSON(fiber.Map{"message": "Password updated successfully"})
+}
+
+// Delete Account
+func DeleteAccount(c *fiber.Ctx) error {
+	userID := c.Locals("userID").(uint)
+
+	// Transaction to delete user and related data if necessary (GORM usually handles cascading if configured, or soft delete)
+	// Assuming strict delete for now since user requested "delete account"
+
+	// First delete transactions? Or let GORM constraints handle it.
+	// For safety, let's just delete the user.
+	if err := config.DB.Delete(&models.User{}, userID).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "Failed to delete account"})
+	}
+
+	return c.JSON(fiber.Map{"message": "Account deleted successfully"})
+}

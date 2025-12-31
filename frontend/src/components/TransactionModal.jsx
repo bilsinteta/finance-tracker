@@ -1,5 +1,9 @@
 import { useState, useEffect } from 'react';
 import { FiX } from 'react-icons/fi';
+import Button from './ui/Button';
+import Input from './ui/Input';
+import Select from './ui/Select';
+import { cn } from '../lib/utils';
 
 const TransactionModal = ({ isOpen, onClose, onSubmit, transaction, categories }) => {
   const [formData, setFormData] = useState({
@@ -11,11 +15,23 @@ const TransactionModal = ({ isOpen, onClose, onSubmit, transaction, categories }
 
   useEffect(() => {
     if (transaction) {
+      let dateValue = new Date().toISOString().split('T')[0];
+      try {
+        if (transaction.Date || transaction.date) {
+          const d = new Date(transaction.Date || transaction.date);
+          if (!isNaN(d.getTime())) {
+            dateValue = d.toISOString().split('T')[0];
+          }
+        }
+      } catch (e) {
+        console.error("Invalid date:", e);
+      }
+
       setFormData({
-        category_id: transaction.category_id,
-        amount: transaction.amount,
-        description: transaction.description || '',
-        date: transaction.date.split('T')[0],
+        category_id: transaction.CategoryID || transaction.category_id,
+        amount: transaction.Amount || transaction.amount,
+        description: transaction.Description || transaction.description || '',
+        date: dateValue,
       });
     } else {
       setFormData({
@@ -25,125 +41,135 @@ const TransactionModal = ({ isOpen, onClose, onSubmit, transaction, categories }
         date: new Date().toISOString().split('T')[0],
       });
     }
-  }, [transaction]);
+  }, [transaction, isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Basic Validation
+    if (!formData.category_id || !formData.amount || !formData.date) {
+      alert("Mohon lengkapi semua kolom");
+      return;
+    }
+
     onSubmit({
       ...formData,
-      category_id: parseInt(formData.category_id),
-      amount: parseFloat(formData.amount),
+      category_id: Number(formData.category_id),
+      amount: Number(formData.amount),
     });
   };
 
   if (!isOpen) return null;
 
+  const safeCategories = Array.isArray(categories) ? categories : [];
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
+      <div className="bg-white text-slate-900 rounded-xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">
+        <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-white">
+          <h2 className="text-lg font-bold text-slate-800">
             {transaction ? 'Edit Transaksi' : 'Tambah Transaksi'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition"
+            className="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
           >
-            <FiX size={24} />
+            <FiX className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Kategori
-              </label>
-              <select
-                value={formData.category_id}
-                onChange={(e) =>
-                  setFormData({ ...formData, category_id: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              >
-                <option value="">Pilih Kategori</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name} ({cat.type === 'income' ? 'Pemasukan' : 'Pengeluaran'})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Jumlah (Rp)
-              </label>
-              <input
-                type="number"
-                value={formData.amount}
-                onChange={(e) =>
-                  setFormData({ ...formData, amount: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="50000"
-                required
-              />
-            </div>
-
-            {/* Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tanggal
-              </label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) =>
-                  setFormData({ ...formData, date: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                required
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Deskripsi (Opsional)
-              </label>
-              <textarea
-                value={formData.description}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                rows="3"
-                placeholder="Catatan tambahan..."
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5 bg-white">
+          {/* Category */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">
+              Kategori
+            </label>
+            <Select
+              value={formData.category_id}
+              onChange={(e) =>
+                setFormData({ ...formData, category_id: e.target.value })
+              }
+              className="bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-slate-900"
+              required
+            >
+              <option value="">Pilih Kategori</option>
+              {safeCategories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name} ({cat.type === 'income' ? 'Pemasukan' : 'Pengeluaran'})
+                </option>
+              ))}
+            </Select>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-4 mt-6">
-            <button
+          {/* Amount */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">
+              Jumlah (Rp)
+            </label>
+            <Input
+              type="number"
+              value={formData.amount}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: e.target.value })
+              }
+              placeholder="0"
+              min="0"
+              className="bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-slate-900 font-medium placeholder:text-slate-400"
+              required
+            />
+          </div>
+
+          {/* Date */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">
+              Tanggal
+            </label>
+            <Input
+              type="date"
+              value={formData.date}
+              onChange={(e) =>
+                setFormData({ ...formData, date: e.target.value })
+              }
+              className="bg-white border-slate-300 focus:border-blue-500 focus:ring-blue-500 text-slate-900 w-full"
+              required
+            />
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="text-sm font-semibold text-slate-700">
+              Deskripsi (Opsional)
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              className={cn(
+                "flex min-h-[80px] w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus-visible:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              )}
+              placeholder="Catatan..."
+            />
+          </div>
+
+          {/* Footer actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-50 mt-6">
+            <Button
               type="button"
+              variant="ghost"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+              className="text-slate-600 hover:text-slate-800 hover:bg-slate-100"
             >
               Batal
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6"
             >
-              {transaction ? 'Update' : 'Simpan'}
-            </button>
+              {transaction ? 'Simpan Perubahan' : 'Simpan'}
+            </Button>
           </div>
         </form>
       </div>

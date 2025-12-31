@@ -8,12 +8,12 @@ export const authService = {
       email,
       password,
     });
-    
+
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
-    
+
     return response.data;
   },
 
@@ -23,12 +23,12 @@ export const authService = {
       email,
       password,
     });
-    
+
     if (response.data.token) {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
     }
-    
+
     return response.data;
   },
 
@@ -47,5 +47,15 @@ export const authService = {
   // Check if user is logged in
   isAuthenticated: () => {
     return !!localStorage.getItem('token');
+  },
+
+  // Change Password
+  changePassword: async (data) => {
+    return await axios.put('/profile/password', data);
+  },
+
+  // Delete Account
+  deleteAccount: async () => {
+    return await axios.delete('/profile/account');
   },
 };

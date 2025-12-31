@@ -1,4 +1,5 @@
-import { FiTrendingUp, FiTrendingDown, FiDollarSign } from 'react-icons/fi';
+import { FiTrendingUp, FiTrendingDown, FiArchive } from 'react-icons/fi';
+import { Card, CardContent } from './ui/Card';
 
 const BalanceCard = ({ balance }) => {
   const formatCurrency = (amount) => {
@@ -10,40 +11,37 @@ const BalanceCard = ({ balance }) => {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      {/* Total Income */}
-      <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Total Pemasukan</h3>
-          <FiTrendingUp className="text-3xl" />
-        </div>
-        <p className="text-3xl font-bold">
-          {formatCurrency(balance?.total_income || 0)}
-        </p>
-      </div>
+    <Card className="bg-white border-none shadow-sm h-full rounded-md">
+      <CardContent className="p-4">
+        <h2 className="text-sm font-semibold text-slate-700 mb-4">Ringkasan</h2>
 
-      {/* Total Expense */}
-      <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Total Pengeluaran</h3>
-          <FiTrendingDown className="text-3xl" />
-        </div>
-        <p className="text-3xl font-bold">
-          {formatCurrency(balance?.total_expense || 0)}
-        </p>
-      </div>
+        <div className="space-y-3">
+          {/* Balance */}
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+            <span className="text-xs text-slate-500 font-medium">Saldo</span>
+            <span className="text-lg font-bold text-blue-600">
+              {formatCurrency(balance?.balance || 0)}
+            </span>
+          </div>
 
-      {/* Balance */}
-      <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold">Saldo</h3>
-          <FiDollarSign className="text-3xl" />
+          {/* Income */}
+          <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+            <span className="text-xs text-slate-500 font-medium">Pemasukan</span>
+            <span className="text-base font-bold text-green-600">
+              {formatCurrency(balance?.total_income || 0)}
+            </span>
+          </div>
+
+          {/* Expense */}
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-slate-500 font-medium">Pengeluaran</span>
+            <span className="text-base font-bold text-red-600">
+              {formatCurrency(balance?.total_expense || 0)}
+            </span>
+          </div>
         </div>
-        <p className="text-3xl font-bold">
-          {formatCurrency(balance?.balance || 0)}
-        </p>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 

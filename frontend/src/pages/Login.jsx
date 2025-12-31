@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FiMail, FiLock } from 'react-icons/fi';
+import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
+import Button from '../components/ui/Button';
+import Input from '../components/ui/Input';
+import { Card, CardContent } from '../components/ui/Card';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -28,79 +31,78 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 px-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-        {/* Logo */}
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4">
+      <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-2">💰</h1>
-          <h2 className="text-3xl font-bold text-gray-800">Finance Tracker</h2>
-          <p className="text-gray-600 mt-2">Masuk ke akun Anda</p>
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded bg-orange-500 text-white shadow-sm mb-4">
+            <span className="text-2xl font-bold">💰</span>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-800">
+            Masuk ke Akun
+          </h1>
+          <p className="text-slate-500 mt-2">
+            Kelola keuanganmu dgn Anggaran Cepat
+          </p>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <div className="relative">
-                <FiMail className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="john@example.com"
-                  required
-                />
+        <Card className="bg-white border-none shadow-sm">
+          <CardContent className="p-8">
+            {error && (
+              <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-6 text-sm font-medium border border-red-100">
+                {error}
               </div>
-            </div>
+            )}
 
-            {/* Password */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <FiLock className="absolute left-3 top-3 text-gray-400" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  placeholder="••••••••"
-                  required
-                />
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Email</label>
+                <div className="relative">
+                  <FiMail className="absolute left-3 top-3.5 text-slate-400 h-4 w-4" />
+                  <Input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="email@contoh.com"
+                    required
+                  />
+                </div>
               </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <label className="text-sm font-semibold text-slate-700">Password</label>
+                </div>
+                <div className="relative">
+                  <FiLock className="absolute left-3 top-3.5 text-slate-400 h-4 w-4" />
+                  <Input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 h-11 bg-slate-50 border-slate-200 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full h-11 text-base bg-blue-500 hover:bg-blue-600 text-white font-semibold" disabled={loading}>
+                {loading ? 'Memproses...' : (
+                  <span className="flex items-center justify-center gap-2">
+                    Masuk <FiArrowRight />
+                  </span>
+                )}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center text-sm text-slate-500">
+              Belum punya akun?{' '}
+              <Link to="/register" className="font-semibold text-blue-600 hover:text-blue-700 hover:underline">
+                Daftar sekarang
+              </Link>
             </div>
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full mt-6 px-4 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Loading...' : 'Masuk'}
-          </button>
-        </form>
-
-        {/* Register Link */}
-        <p className="text-center mt-6 text-gray-600">
-          Belum punya akun?{' '}
-          <Link to="/register" className="text-primary font-semibold hover:underline">
-            Daftar sekarang
-          </Link>
-        </p>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

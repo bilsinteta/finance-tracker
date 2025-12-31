@@ -3,6 +3,8 @@ package controllers
 import (
 	"finance-tracker-backend/config"
 	"finance-tracker-backend/models"
+	"math"
+	"strconv"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +20,7 @@ type TransactionRequest struct {
 // Get All Transactions (dengan filter)
 func GetTransactions(c *fiber.Ctx) error {
 	userID := c.Locals("userID").(uint)
-	
+
 	var transactions []models.Transaction
 	query := config.DB.Where("user_id = ?", userID)
 
@@ -31,7 +33,7 @@ func GetTransactions(c *fiber.Ctx) error {
 	// Filter by date range
 	startDate := c.Query("start_date") // Format: 2024-01-01
 	endDate := c.Query("end_date")
-	
+
 	if startDate != "" {
 		query = query.Where("date >= ?", startDate)
 	}
@@ -39,13 +41,35 @@ func GetTransactions(c *fiber.Ctx) error {
 		query = query.Where("date <= ?", endDate)
 	}
 
-	// Preload relations
-	if err := query.Preload("Category").Order("date DESC").Find(&transactions).Error; err != nil {
+	// Pagination
+	page, _ := strconv.Atoi(c.Query("page", "1"))
+	limit, _ := strconv.Atoi(c.Query("limit", "10"))
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	offset := (page - 1) * limit
+
+	var total int64
+	query.Model(&models.Transaction{}).Count(&total)
+
+	// Preload relations and Apply Pagination
+	if err := query.Preload("Category").Order("date DESC").Limit(limit).Offset(offset).Find(&transactions).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Failed to fetch transactions"})
 	}
 
+	lastPage := math.Ceil(float64(total) / float64(limit))
+
 	return c.JSON(fiber.Map{
-		"transactions": transactions,
+		"data": transactions,
+		"meta": fiber.Map{
+			"total":      total,
+			"page":       page,
+			"last_page":  lastPage,
+			"limit":      limit,
+		},
 	})
 }
 
